@@ -16,6 +16,16 @@ export interface FulfillmentRecord {
 export interface ValidationError {
   row: number;
   reasons: string[];
+  rowData?: {
+    id?: string;
+    raisedDate?: string;
+    fulfilledDate?: string;
+    hiringType?: string;
+    skillRaw?: string;
+    department?: string;
+    location?: string;
+    band?: string;
+  };
 }
 
 export interface ValidationResult {

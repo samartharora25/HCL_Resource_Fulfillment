@@ -49,9 +49,9 @@ function levenshteinDistance(a: string, b: string): number {
 export function mapColumnHeader(rawHeader: string): string | null {
   const normalizedRaw = normalizeString(rawHeader);
   
-  // Explicitly avoid matching 'Requisition Source' to hiringType 
-  if (normalizedRaw.includes('requisition source')) {
-    return null; // Ignore or map separately, but definitely not hiringType
+  // Explicitly avoid matching 'Requisition Source' and classifications
+  if (normalizedRaw.includes('requisition source') || normalizedRaw.includes('classification')) {
+    return null;
   }
   
   let bestMatch: string | null = null;
@@ -68,6 +68,11 @@ export function mapColumnHeader(rawHeader: string): string | null {
       
       // Substring match
       if (normalizedRaw.includes(normalizedSynonym) || normalizedSynonym.includes(normalizedRaw)) {
+        // Prevent false match of synonym 'source' to raw headers containing 'resource' (e.g. resource band)
+        if (normalizedSynonym === 'source' && normalizedRaw.includes('resource')) {
+          continue;
+        }
+        
         // If it's a good substring match, prioritize it but continue searching for exact
         if (bestScore > 2) { 
           bestMatch = targetField;

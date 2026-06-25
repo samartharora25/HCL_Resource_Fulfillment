@@ -1,23 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Layout } from './components/Layout';
 import { UploadModule } from './components/UploadModule';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
-import { ParseResult } from './lib/parsing';
+import type { ParseResult } from './lib/parsing';
 import { Button } from './components/ui';
 
 function App() {
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'parsing' | 'column_mapping' | 'sheet_selection' | 'validation' | 'error'>('idle');
+  const uploadRef = useRef<{ reset: () => void }>(null);
 
   const handleReset = () => {
     setParseResult(null);
+    setUploadStatus('idle');
   };
 
+  const handleBack = () => {
+    if (parseResult) {
+      handleReset();
+    } else {
+      uploadRef.current?.reset();
+    }
+  };
+
+  const showBack = parseResult !== null || uploadStatus !== 'idle';
+
   return (
-    <Layout>
+    <Layout showBack={showBack} onBack={handleBack}>
       {!parseResult ? (
-        <div style={{ maxWidth: '800px', margin: '0 auto', paddingTop: '40px' }}>
-          <UploadModule onDataReady={setParseResult} />
-        </div>
+        <UploadModule 
+          ref={uploadRef}
+          onDataReady={setParseResult} 
+          onStatusChange={setUploadStatus} 
+        />
       ) : (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>

@@ -15,13 +15,13 @@ describe('parsing and validation', () => {
     const sheetName = workbook.SheetNames[0];
     const result = parseSheetData(workbook, sheetName);
     
-    // 10 data rows in (ignoring header)
-    expect(result.totalRows).toBe(10);
+    // 11 data rows in (ignoring header)
+    expect(result.totalRows).toBe(11);
     
     const { validData, errors } = result.validationResult;
     
-    // We expect I7, I8, I9 to have errors
-    expect(errors.length).toBe(3);
+    // We expect I7, I8, I9, I11 to have errors
+    expect(errors.length).toBe(4);
     
     // I7: duplicate ID (due to Requisition No being mapped to ID and it being a duplicate)
     const errI7 = errors.find(e => e.row === 8); // I7 is 8th data row (row ref 8)
@@ -37,6 +37,11 @@ describe('parsing and validation', () => {
     const errI9 = errors.find(e => e.row === 10);
     expect(errI9).toBeDefined();
     expect(errI9?.reasons).toContain('Invalid hiring type: Contractor. Must be Internal or External.');
+    
+    // I11: invalid skill format (only digits)
+    const errI11 = errors.find(e => e.row === 12);
+    expect(errI11).toBeDefined();
+    expect(errI11?.reasons).toContain('Invalid skill name format');
     
     // Check I6: no joining date, excluded from lead-time but valid
     const validI6 = validData.find(v => v.skillRaw === 'Google Cloud Platform (GCP)');

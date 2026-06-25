@@ -21,7 +21,14 @@ export function validateData(
     if (!row.id) rowErrors.push('Missing unique ID');
     if (!row.raisedDate) rowErrors.push('Missing raised date');
     if (!row.hiringType) rowErrors.push('Missing hiring type');
-    if (!row.skillRaw) rowErrors.push('Missing skill');
+    if (!row.skillRaw) {
+      rowErrors.push('Missing skill');
+    } else {
+      const cleanSkill = row.skillRaw.trim();
+      if (!/[a-zA-Z]/.test(cleanSkill)) {
+        rowErrors.push('Invalid skill name format');
+      }
+    }
     
     // 2. Duplicate ID
     if (row.id) {
@@ -56,7 +63,20 @@ export function validateData(
     }
     
     if (rowErrors.length > 0) {
-      errors.push({ row: rowNum, reasons: rowErrors });
+      errors.push({ 
+        row: rowNum, 
+        reasons: rowErrors,
+        rowData: {
+          id: row.id || undefined,
+          raisedDate: row.raisedDate && isValid(row.raisedDate) ? row.raisedDate.toISOString().split('T')[0] : undefined,
+          fulfilledDate: row.fulfilledDate && isValid(row.fulfilledDate) ? row.fulfilledDate.toISOString().split('T')[0] : undefined,
+          hiringType: row.hiringType || undefined,
+          skillRaw: row.skillRaw || undefined,
+          department: row.department || undefined,
+          location: row.location || undefined,
+          band: row.band || undefined
+        }
+      });
     } else {
       validData.push(row as FulfillmentRecord);
     }
